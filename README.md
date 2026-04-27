@@ -1,9 +1,52 @@
+📂 Dataset Overview
+
+The analysis is based on the Contoso dataset, a retail business dataset containing transactional and customer-level information.
+
+Data Scope:
+
+Time period: 2015 – 2024
+Granularity: Customer-level and transaction-level data
+
+Key Tables Used:
+
+Sales → Transactional revenue data
+Customers → Customer demographics and identifiers
+Products → Product categories and pricing
+
+Key Metrics Derived:
+
+Customer Lifetime Value (LTV) → Total revenue generated per customer
+Cohort Year → First purchase year of customer
+Revenue per Customer (ARPU) → Average revenue per user
+Retention / Churn Rate → Active vs churned customers by cohort
+
+Data Transformations:
+
+Aggregated revenue at customer level to compute LTV
+Segmented customers into Low, Mid, High-value tiers
+Built cohort-based aggregations for trend analysis
+Calculated retention percentages using cohort tracking
+
+
 01 -  Customer Segmentation Analysis 
 🎯 Executive Summary (What matters most)
 We segmented customers into Low, Mid, and High LTV tiers and analyzed their revenue contribution.
 Key finding:
 A small group of high-value customers contributes ~66% of total revenue, while low-value customers contribute only ~2%.
 This indicates a heavily skewed revenue distribution, where growth is driven more by customer quality than customer quantity.
+
+segement_values AS (
+    SELECT
+        c.customerkey,
+        c.total_ltv,
+        CASE
+            WHEN c.total_ltv < percentile_25th THEN '1 - Low-Value'
+            WHEN c.total_ltv BETWEEN percentile_25th AND percentile_75th THEN '2 - Mid-Value'
+            ELSE '3 - High-Value'
+        END AS customer_segment
+    FROM customer_ltv c,
+    customer_segments cs
+)
 
 📊 Core Findings
 1. Revenue Concentration
@@ -106,6 +149,15 @@ Customer volume
 Revenue per customer
 Key takeaway:
 Growth has been inconsistent and recently declining in customer quality (revenue per user), despite periods of strong acquisition.
+
+SELECT
+    days_since_first_purchase,
+    SUM(total_net_revenue) as total_revenue,
+    SUM(total_net_revenue) / (SELECT SUM(total_net_revenue) FROM cohort_analysis) * 100 as percentage_of_total_revenue,
+    SUM(SUM(total_net_revenue) / (SELECT SUM(total_net_revenue) FROM cohort_analysis) * 100) OVER (ORDER BY days_since_first_purchase) as cumulative_percentage_of_total_revenue
+FROM purchase_days
+GROUP BY days_since_first_purchase
+ORDER BY days_since_first_purchase;
 
 📊 Core Findings
 1. Growth Phase vs Instability Phase
@@ -235,6 +287,17 @@ Across all cohorts (2015–2023), ~90–92% of customers churn, and only ~8–10
 This indicates:
 A severe retention problem — the business is heavily dependent on constant new customer acquisition to sustain revenue.
 
+SELECT
+    cohort_year,
+    customer_status,
+    COUNT(customerkey) AS num_customers,
+    SUM(COUNT(customerkey)) OVER(PARTITION BY cohort_year) AS total_customers,
+    ROUND(COUNT(customerkey) / SUM(COUNT(customerkey)) OVER(PARTITION BY cohort_year), 2) AS cohort_percentage
+FROM churned_customers
+GROUP BY
+    cohort_year,
+    customer_status
+
 📊 Core Findings
 1. Extremely High Churn Rate (Primary Insight)
 Churn rate consistently: ~90–92%
@@ -329,6 +392,78 @@ Reduce dependency on acquisition
 
 🧠 Final Stakeholder Message
 “The core issue is not just growth or revenue — it’s retention. We are losing ~90% of customers across every cohort, which makes the business heavily acquisition-dependent and structurally unstable.”
+
+🧠 Final Business Insights
+🎯 Overall Diagnosis
+
+The business exhibits a structurally unstable growth model, driven by high churn, declining customer value, and heavy reliance on a small segment of high-value customers.
+
+🔑 Key Insights
+1. Revenue Concentration Risk
+~65% of revenue comes from high-value customers
+Business is highly dependent on a small customer segment
+
+👉 Risk:
+Loss of a small group of customers can significantly impact revenue
+
+2. Declining Customer Quality
+Revenue per customer has consistently decreased over time
+Growth periods (e.g., 2022) were driven by volume, not value
+
+👉 Insight:
+Customer acquisition strategy is bringing in lower-value users
+
+3. Extremely High Churn (~90%)
+Only 8–10% of customers are retained
+Consistent across all cohorts
+
+👉 Insight:
+The business lacks customer stickiness and long-term engagement
+
+4. Acquisition-Dependent Growth Model
+Due to high churn, business relies on:
+Continuous new customer acquisition
+Increased marketing spend
+
+👉 Risk:
+Rising CAC and declining profitability
+
+⚠️ Core Problem Statement
+
+This is not a growth problem — it is a retention and value optimization problem.
+
+Increasing users alone will not drive sustainable revenue
+Long-term growth depends on improving:
+Retention
+Customer value
+🚀 Strategic Recommendations
+1. Retention First Strategy
+Improve onboarding and early user experience
+Implement lifecycle marketing (email, personalization)
+Focus on reducing churn in first few months
+2. Monetization Optimization
+Reduce reliance on discounts
+Introduce upselling and cross-selling strategies
+Target high-intent users
+3. High-Value Customer Protection
+Loyalty programs
+Premium support
+Personalized engagement
+📈 Business Impact Opportunity
+
+If the business:
+
+Improves retention from 10% → 15%
+Converts more mid-value users into high-value
+
+👉 Expected Outcome:
+
+Significant revenue growth
+Reduced acquisition dependency
+Improved profitability
+🧠 Final Takeaway
+
+Sustainable growth will come not from acquiring more customers, but from retaining and maximizing the value of existing ones.
 
 
 
