@@ -155,9 +155,6 @@ Growth has been inconsistent and recently declining in customer quality (revenue
     SUM(total_net_revenue) as total_revenue,
     SUM(total_net_revenue) / (SELECT SUM(total_net_revenue) FROM cohort_analysis) * 100 as percentage_of_total_revenue,
     SUM(SUM(total_net_revenue) / (SELECT SUM(total_net_revenue) FROM cohort_analysis) * 100) OVER (ORDER BY days_since_first_purchase) as cumulative_percentage_of_total_revenue
-FROM purchase_days
-GROUP BY days_since_first_purchase
-ORDER BY days_since_first_purchase;
 
 
 
@@ -296,10 +293,7 @@ A severe retention problem — the business is heavily dependent on constant new
     COUNT(customerkey) AS num_customers,
     SUM(COUNT(customerkey)) OVER(PARTITION BY cohort_year) AS total_customers,
     ROUND(COUNT(customerkey) / SUM(COUNT(customerkey)) OVER(PARTITION BY cohort_year), 2) AS cohort_percentage
-FROM churned_customers
-GROUP BY
-    cohort_year,
-    customer_status
+
 
 📊 Core Findings
 1. Extremely High Churn Rate (Primary Insight)
