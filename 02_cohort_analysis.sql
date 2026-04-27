@@ -1,4 +1,4 @@
---Title: Customer Revenue by Cohort (NOT adjusted for time in market)
+
 SELECT
     cohort_year,
     SUM(total_net_revenue) AS total_revenue,
@@ -8,7 +8,7 @@ FROM cohort_analysis
 GROUP BY 
     cohort_year;
 
--- Title: Customer Revenue by Cohort (Adjusted for time in market)
+
 WITH purchase_days AS (
     SELECT
         customerkey,
@@ -26,7 +26,7 @@ FROM purchase_days
 GROUP BY days_since_first_purchase
 ORDER BY days_since_first_purchase;
 
--- Title: Customer Revenue by Cohort (Adjusted for time in market) - Only First Purchase Date
+
 SELECT
     cohort_year,
     SUM(total_net_revenue) AS total_revenue,
