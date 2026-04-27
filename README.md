@@ -35,7 +35,7 @@ Key finding:
 A small group of high-value customers contributes ~66% of total revenue, while low-value customers contribute only ~2%.
 This indicates a heavily skewed revenue distribution, where growth is driven more by customer quality than customer quantity.
 
-segement_values AS (
+-- segement_values AS (
     SELECT
         c.customerkey,
         c.total_ltv,
@@ -150,7 +150,7 @@ Revenue per customer
 Key takeaway:
 Growth has been inconsistent and recently declining in customer quality (revenue per user), despite periods of strong acquisition.
 
-SELECT
+--SELECT
     days_since_first_purchase,
     SUM(total_net_revenue) as total_revenue,
     SUM(total_net_revenue) / (SELECT SUM(total_net_revenue) FROM cohort_analysis) * 100 as percentage_of_total_revenue,
@@ -287,7 +287,7 @@ Across all cohorts (2015–2023), ~90–92% of customers churn, and only ~8–10
 This indicates:
 A severe retention problem — the business is heavily dependent on constant new customer acquisition to sustain revenue.
 
-SELECT
+--SELECT
     cohort_year,
     customer_status,
     COUNT(customerkey) AS num_customers,
